@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khai Báo Thông Tin Lưu Trú - Serena Resort Kim Bôi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .emerald-gradient { background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #059669 100%); }
+    .custom-shadow { box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.1), 0 8px 10px -6px rgba(5, 150, 105, 0.1); }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Header / Banner -->
+  <header class="emerald-gradient text-white shadow-lg relative overflow-hidden">
+    <div class="max-w-6xl mx-auto px-4 py-6 relative z-10">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/20">
+            <i class="fa-solid fa-hotel text-2xl text-emerald-300"></i>
+          </div>
+          <div>
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight">SERENA RESORT KIM BÔI</h1>
+            <p class="text-xs md:text-sm text-emerald-100 flex items-center gap-2">
+              <span>Họp Lớp 15C - 30 Năm Ngày Ra Trường</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 bg-white/10 p-1.5 rounded-xl border border-white/20 backdrop-blur-md">
+          <button id="navGuestBtn" onclick="switchRole('guest')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-white text-emerald-900 shadow">
+            <i class="fa-solid fa-pen-to-square mr-1.5"></i>Form Điền
+          </button>
+          <button id="navAdminBtn" onclick="switchRole('admin')" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all text-white hover:bg-white/10">
+            <i class="fa-solid fa-user-shield mr-1.5"></i>Quản Trị
+          </button>
+        </div>
+      </div>
+
+      <!-- Leaders Badge -->
+      <div class="mt-4 pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs md:text-sm">
+        <div class="bg-white/10 rounded-lg p-2.5 px-3 flex items-center justify-between border border-white/10">
+          <span class="text-emerald-200"><i class="fa-solid fa-user-tie mr-2"></i>Trưởng đoàn:</span>
+          <span class="font-bold text-white">Nguyễn Thanh Thế</span>
+        </div>
+        <div class="bg-white/10 rounded-lg p-2.5 px-3 flex items-center justify-between border border-white/10">
+          <span class="text-emerald-200"><i class="fa-solid fa-user-shield mr-2"></i>Phó đoàn:</span>
+          <span class="font-bold text-white">Đinh Thị Thu Hà</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
+
+    <!-- GUEST VIEW: FORM KHAI BÁO -->
+    <div id="guestSection" class="space-y-6">
+      <div class="bg-white rounded-2xl p-6 border border-slate-100 custom-shadow">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <i class="fa-solid fa-id-card text-emerald-600"></i>
+              Phiếu Khai Báo Lưu Trú Cá Nhân
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">Vui lòng chọn Tên hoặc Số phòng của bạn để hệ thống tự động điền thông tin có sẵn.</p>
+          </div>
+          <span class="hidden sm:inline-flex px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200">
+            Serena Resort Kim Bôi
+          </span>
+        </div>
+
+        <!-- Dropdown chọn nhanh -->
+        <div class="mb-6 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
+          <label class="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-2">
+            <i class="fa-solid fa-magnifying-glass mr-1"></i>Chọn Thành Viên / Số Phòng Để Điền Nhanh:
+          </label>
+          <select id="quickSelect" onchange="onSelectMember(this.value)" class="w-full bg-white border border-emerald-200 rounded-lg px-3 py-2.5 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <option value="">-- Chọn Tên Bạn hoặc Số Phòng (1 - 27) --</option>
+          </select>
+        </div>
+
+        <!-- Form nhập liệu -->
+        <form id="stayForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Họ Và Tên <span class="text-rose-500">*</span></label>
+              <input type="text" id="fullName" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Nguyễn Văn A">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Số Phòng (1 - 27) <span class="text-rose-500">*</span></label>
+              <input type="number" id="roomGroup" min="1" max="27" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="1">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Số CCCD / Định Danh <span class="text-rose-500">*</span></label>
+              <input type="text" id="cccd" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="001090XXXXXX">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ngày / Tháng / Năm Sinh <span class="text-rose-500">*</span></label>
+              <input type="date" id="dob" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Số Điện Thoại Liên Hệ <span class="text-rose-500">*</span></label>
+              <input type="tel" id="phone" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="0987654321">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Giới Tính <span class="text-rose-500">*</span></label>
+              <select id="gender" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Biển Số Xe (Nếu đi xe riêng)</label>
+              <input type="text" id="licensePlate" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ví dụ: 30A-123.45">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Vai Trò Trong Đoàn</label>
+              <input type="text" id="roleInGroup" readonly value="Thành viên đoàn 15C" class="w-full bg-slate-100 border border-slate-200 text-slate-500 rounded-lg px-3 py-2 text-sm cursor-not-allowed">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Địa Chỉ Thường Trú (Theo CCCD) <span class="text-rose-500">*</span></label>
+            <input type="text" id="address" required class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Số nhà, đường/phố, phường/xã, quận/huyện, tỉnh/thành phố">
+          </div>
+
+          <div class="pt-4 flex items-center justify-end gap-3">
+            <button type="button" onclick="resetForm()" class="px-5 py-2.5 border border-slate-300 rounded-xl text-slate-600 font-semibold text-sm hover:bg-slate-50 transition">
+              Làm Mới
+            </button>
+            <button type="submit" class="px-6 py-2.5 bg-emerald-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-600/30 hover:bg-emerald-700 transition">
+              <i class="fa-solid fa-paper-plane mr-2"></i>Gửi Khai Báo
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ADMIN VIEW -->
+    <div id="adminSection" class="hidden space-y-6">
+      
+      <!-- Login Gate -->
+      <div id="adminAuthGate" class="max-w-md mx-auto bg-white rounded-2xl p-6 border border-slate-200 shadow-xl text-center space-y-4">
+        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800">Đăng Nhập Quyền Quản Trị</h3>
+        <p class="text-xs text-slate-500">Nhập mật khẩu quản trị viên để xem tiến độ và xuất báo cáo Excel cho Serena Resort.</p>
+        <input type="password" id="adminPassInput" placeholder="Mật khẩu (mặc định: admin123)" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-center focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        <button onclick="checkAdminAuth()" class="w-full bg-emerald-600 text-white font-semibold py-2.5 rounded-lg shadow hover:bg-emerald-700 transition">
+          Xác Nhận Đăng Nhập
+        </button>
+      </div>
+
+      <!-- Admin Panel -->
+      <div id="adminPanel" class="hidden space-y-6">
+        
+        <!-- Stats Bar -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-400 uppercase">Tổng Khách Đoàn</p>
+              <h4 id="statTotal" class="text-2xl font-extrabold text-slate-800">54</h4>
+            </div>
+            <div class="w-10 h-10 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-users"></i>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-emerald-600 uppercase">Đã Khai Báo</p>
+              <h4 id="statDone" class="text-2xl font-extrabold text-emerald-600">0 / 54</h4>
+            </div>
+            <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-rose-500 uppercase">Chưa Khai Báo</p>
+              <h4 id="statPending" class="text-2xl font-extrabold text-rose-500">54</h4>
+            </div>
+            <div class="w-10 h-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls & Export -->
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <input type="text" id="adminSearch" oninput="renderAdminTable()" placeholder="Tìm theo Tên, Phòng..." class="border border-slate-200 rounded-lg px-3 py-2 text-sm w-full md:w-64 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <select id="adminFilterStatus" onchange="renderAdminTable()" class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <option value="all">Tất cả trạng thái</option>
+              <option value="done">Đã khai báo</option>
+              <option value="pending">Chưa khai báo</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+            <button onclick="exportToExcel()" class="px-4 py-2 bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow hover:bg-emerald-800 transition flex items-center gap-2">
+              <i class="fa-solid fa-file-excel"></i>Xuất Excel Báo Cáo
+            </button>
+          </div>
+        </div>
+
+        <!-- Admin Table -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div class="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="font-bold text-slate-800 text-sm">Danh Sách Khai Báo Chi Tiết 27 Phòng</h3>
+            <span class="text-xs text-slate-500">Loại phòng chỉ hiển thị trong giao diện Quản trị</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 text-slate-600 font-bold uppercase tracking-wider">
+                <tr>
+                  <th class="p-3">STT</th>
+                  <th class="p-3">Họ Và Tên</th>
+                  <th class="p-3">Phòng Đoàn</th>
+                  <th class="p-3 text-emerald-700">Loại Phòng (Admin)</th>
+                  <th class="p-3">CCCD/CMT</th>
+                  <th class="p-3">SĐT</th>
+                  <th class="p-3">Trạng Thái</th>
+                  <th class="p-3 text-right">Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="adminTableBody" class="divide-y divide-slate-100">
+                <!-- Dynamic Rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const initialRoomsData = {
+      1: { type: "Zen suite king", members: ["Lê Ngọc Lâm", "Văn Quang Đức"] },
+      2: { type: "Zen house twin", members: ["Nguyễn Tuấn Nam", "Đào Duy Lực"] },
+      3: { type: "Zen house twin", members: ["Hà Huy Tố", "Trần Khánh"] },
+      4: { type: "Zen suite king", members: ["Hà Tuyết Anh", "Nguyễn Quỳnh Mai"] },
+      5: { type: "Zen suite king", members: ["Nguyễn Thị Tuấn Anh", "Nguyễn Thanh Phương"] },
+      6: { type: "Zen house twin", members: ["Lê Thu Hằng", "Vũ Thu Hiền"] },
+      7: { type: "Zen house twin", members: ["Trịnh Hồng Hạnh", "Đặng Thanh Nhàn"] },
+      8: { type: "Zen house twin", members: ["Phạm Thanh Nga", "Đỗ Hương Giang"] },
+      9: { type: "Zen house twin", members: ["Đặng Phương Nga", "Trần Thục Oanh"] },
+      10: { type: "Zen house twin", members: ["Vũ Việt Hà", "Trần Thanh Phương"] },
+      11: { type: "Zen house twin", members: ["Nguyễn Thu Hà", "Trần Mai Hương"] },
+      12: { type: "Zen house king", members: ["Nguyễn Ngọc Anh", "Vũ Thị Thu Cúc"] },
+      13: { type: "Zen house twin", members: ["Bùi Ánh Tuyết", "Nguyễn Thu Hiền"] },
+      14: { type: "Zen house twin", members: ["Trần Thị Thương", "Nguyễn Vân Hà"] },
+      15: { type: "Zen suite king", members: ["Đinh Thu Hà", "Nguyễn Thanh Thế"] },
+      16: { type: "Zen house twin", members: ["Lê Thanh Tùng", "Dương Tuấn Anh"] },
+      17: { type: "Zen house twin", members: ["Trịnh Bá Hưng", "Nguyễn Thanh Hải"] },
+      18: { type: "Zen house twin", members: ["Lý Công Độ", "Nguyễn Bình"] },
+      19: { type: "Zen house twin", members: ["Dư Đức Phương", "Vũ Anh Hải"] },
+      20: { type: "Zen house twin", members: ["Nguyễn Trung Nghĩa", "Trần Hoa Việt"] },
+      21: { type: "Zen house twin", members: ["Nông Văn Dong", "Kim Đức Tuân"] },
+      22: { type: "Zen house twin", members: ["Lê Quốc Sơn", "Nguyễn Đức Cang"] },
+      23: { type: "Zen house twin", members: ["Trần Đình Phong", "Nguyễn Quang Phú"] },
+      24: { type: "Zen house twin", members: ["Nguyễn Thanh Nghị", "Nguyễn Thanh Quang"] },
+      25: { type: "Zen house twin", members: ["Vũ Quốc Huy", "Nguyễn Minh Hoàng"] },
+      26: { type: "Zen house twin", members: ["Lê Mạnh Dũng", "Backup nhỡ đâu"] },
+      27: { type: "Zen house twin", members: ["Nguyễn Thiều Sơn", "Nguyễn Công Thắng"] }
+    };
+
+    let guestRecords = {};
+    let roomConfigs = {};
+    let currentRole = 'guest';
+    let isAdminLoggedIn = false;
+
+    function initData() {
+      const savedRecords = localStorage.getItem('serena_guest_records_v4');
+      if (savedRecords) {
+        guestRecords = JSON.parse(savedRecords);
+      }
+
+      const savedConfigs = localStorage.getItem('serena_room_configs_v4');
+      if (savedConfigs) {
+        roomConfigs = JSON.parse(savedConfigs);
+      } else {
+        for (let i = 1; i <= 27; i++) {
+          roomConfigs[i] = { type: initialRoomsData[i].type };
+        }
+      }
+
+      populateQuickSelectOptions();
+    }
+
+    function populateQuickSelectOptions() {
+      const select = document.getElementById('quickSelect');
+      select.innerHTML = '<option value="">-- Chọn Tên Bạn hoặc Số Phòng (1 - 27) --</option>';
+
+      for (let r = 1; r <= 27; r++) {
+        const groupLabel = `Phòng ${r}`;
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = groupLabel;
+
+        initialRoomsData[r].members.forEach(name => {
+          const option = document.createElement('option');
+          option.value = `${r}|${name}`;
+          option.textContent = `${name} - Phòng ${r}`;
+          optgroup.appendChild(option);
+        });
+
+        select.appendChild(optgroup);
+      }
+    }
+
+    function onSelectMember(val) {
+      if (!val) return;
+      const [roomStr, name] = val.split('|');
+      const r = parseInt(roomStr);
+
+      document.getElementById('fullName').value = name;
+      document.getElementById('roomGroup').value = r;
+
+      if (guestRecords[name]) {
+        const rec = guestRecords[name];
+        document.getElementById('cccd').value = rec.cccd || '';
+        document.getElementById('dob').value = rec.dob || '';
+        document.getElementById('phone').value = rec.phone || '';
+        document.getElementById('gender').value = rec.gender || 'Nam';
+        document.getElementById('licensePlate').value = rec.licensePlate || '';
+        document.getElementById('address').value = rec.address || '';
+      } else {
+        document.getElementById('cccd').value = '';
+        document.getElementById('dob').value = '';
+        document.getElementById('phone').value = '';
+        document.getElementById('gender').value = 'Nam';
+        document.getElementById('licensePlate').value = '';
+        document.getElementById('address').value = '';
+      }
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('fullName').value.trim();
+      const roomGroup = parseInt(document.getElementById('roomGroup').value);
+
+      if (!name || !roomGroup) {
+        alert("Vui lòng điền đầy đủ Tên và Số phòng!");
+        return;
+      }
+
+      guestRecords[name] = {
+        fullName: name,
+        roomGroup: roomGroup,
+        cccd: document.getElementById('cccd').value.trim(),
+        dob: document.getElementById('dob').value,
+        phone: document.getElementById('phone').value.trim(),
+        gender: document.getElementById('gender').value,
+        licensePlate: document.getElementById('licensePlate').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        updatedAt: new Date().toISOString()
+      };
+
+      localStorage.setItem('serena_guest_records_v4', JSON.stringify(guestRecords));
+      alert(`Đã lưu thông tin khai báo cho thành viên ${name} thành công!`);
+    }
+
+    function resetForm() {
+      document.getElementById('stayForm').reset();
+      document.getElementById('quickSelect').value = '';
+    }
+
+    function switchRole(role) {
+      currentRole = role;
+      const guestSec = document.getElementById('guestSection');
+      const adminSec = document.getElementById('adminSection');
+      const navGuest = document.getElementById('navGuestBtn');
+      const navAdmin = document.getElementById('navAdminBtn');
+
+      if (role === 'guest') {
+        guestSec.classList.remove('hidden');
+        adminSec.classList.add('hidden');
+        navGuest.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-white text-emerald-900 shadow";
+        navAdmin.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all text-white hover:bg-white/10";
+      } else {
+        guestSec.classList.add('hidden');
+        adminSec.classList.remove('hidden');
+        navGuest.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all text-white hover:bg-white/10";
+        navAdmin.className = "px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-white text-emerald-900 shadow";
+
+        if (isAdminLoggedIn) {
+          document.getElementById('adminAuthGate').classList.add('hidden');
+          document.getElementById('adminPanel').classList.remove('hidden');
+          renderAdminTable();
+        } else {
+          document.getElementById('adminAuthGate').classList.remove('hidden');
+          document.getElementById('adminPanel').classList.add('hidden');
+        }
+      }
+    }
+
+    function checkAdminAuth() {
+      const pass = document.getElementById('adminPassInput').value;
+      if (pass === 'admin123' || pass === 'admin') {
+        isAdminLoggedIn = true;
+        document.getElementById('adminAuthGate').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        renderAdminTable();
+      } else {
+        alert("Mật khẩu Quản trị chưa chính xác! (Mặc định: admin123)");
+      }
+    }
+
+    function renderAdminTable() {
+      const tbody = document.getElementById('adminTableBody');
+      const search = document.getElementById('adminSearch').value.toLowerCase();
+      const filter = document.getElementById('adminFilterStatus').value;
+
+      tbody.innerHTML = '';
+      let doneCount = 0;
+      let totalCount = 54;
+      let stt = 1;
+
+      for (let r = 1; r <= 27; r++) {
+        const members = initialRoomsData[r].members;
+        const roomType = roomConfigs[r] ? roomConfigs[r].type : initialRoomsData[r].type;
+
+        members.forEach(mName => {
+          const isDone = !!guestRecords[mName];
+          if (isDone) doneCount++;
+
+          if (filter === 'done' && !isDone) return;
+          if (filter === 'pending' && isDone) return;
+
+          if (search && !mName.toLowerCase().includes(search) && !`phòng ${r}`.includes(search)) {
+            return;
+          }
+
+          const rec = guestRecords[mName] || {};
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-slate-50 transition";
+
+          tr.innerHTML = `
+            <td class="p-3 font-semibold text-slate-400">${stt++}</td>
+            <td class="p-3 font-bold text-slate-800">${mName}</td>
+            <td class="p-3"><span class="px-2 py-1 bg-slate-100 font-semibold rounded text-slate-700">Phòng ${r}</span></td>
+            <td class="p-3 font-medium text-emerald-800">${roomType}</td>
+            <td class="p-3 text-slate-600">${rec.cccd || '-'}</td>
+            <td class="p-3 text-slate-600">${rec.phone || '-'}</td>
+            <td class="p-3">
+              ${isDone 
+                ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-bold text-[10px]">Đã khai báo</span>' 
+                : '<span class="px-2 py-0.5 bg-rose-100 text-rose-800 rounded-full font-bold text-[10px]">Chưa khai báo</span>'}
+            </td>
+            <td class="p-3 text-right">
+              ${isDone ? `<button onclick="editGuest('${mName}')" class="text-xs text-emerald-600 hover:underline font-semibold">Sửa</button>` : '-'}
+            </td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+      }
+
+      document.getElementById('statDone').textContent = `${doneCount} / ${totalCount}`;
+      document.getElementById('statPending').textContent = totalCount - doneCount;
+    }
+
+    function editGuest(name) {
+      switchRole('guest');
+      onSelectMember(`1|${name}`);
+    }
+
+    function exportToExcel() {
+      const data = [];
+      let stt = 1;
+
+      for (let r = 1; r <= 27; r++) {
+        const members = initialRoomsData[r].members;
+        const roomType = roomConfigs[r] ? roomConfigs[r].type : initialRoomsData[r].type;
+
+        members.forEach(mName => {
+          const rec = guestRecords[mName] || {};
+          data.push({
+            "STT": stt++,
+            "Họ và tên": mName,
+            "Số phòng đoàn": r,
+            "Hạng / Loại phòng": roomType,
+            "Ngày sinh": rec.dob || "",
+            "Số CCCD/CMT": rec.cccd || "",
+            "Số điện thoại": rec.phone || "",
+            "Giới tính": rec.gender || "",
+            "Địa chỉ thường trú": rec.address || "",
+            "Biển số xe": rec.licensePlate || "",
+            "Trạng thái": rec.cccd ? "Đã khai báo" : "Chưa khai báo"
+          });
+        });
+      }
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "DanhSachLuuTru");
+      XLSX.writeFile(wb, "Danh_Sach_Luu_Tru_Serena_Resort_15C.xlsx");
+    }
+
+    window.onload = initData;
+  </script>
+</body>
+</html>
