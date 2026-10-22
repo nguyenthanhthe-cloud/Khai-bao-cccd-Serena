@@ -68,14 +68,14 @@
               <i class="fa-solid fa-id-card text-emerald-600"></i>
               Phiếu Khai Báo Lưu Trú Cá Nhân
             </h2>
-            <p class="text-xs text-slate-500 mt-1">Vui lòng chọn Tên hoặc Số phòng của bạn để hệ thống tự động điền thông tin có sẵn.</p>
+            <p class="text-xs text-slate-500 mt-1">Vui lòng chọn Tên hoặc Số phòng của bạn để hệ thống điền thông tin có sẵn.</p>
           </div>
           <span class="hidden sm:inline-flex px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-200">
             Serena Resort Kim Bôi
           </span>
         </div>
 
-        <!-- Dropdown chọn nhanh -->
+        <!-- Dropdown chọn nhanh (Ẩn hoàn toàn loại phòng) -->
         <div class="mb-6 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
           <label class="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-2">
             <i class="fa-solid fa-magnifying-glass mr-1"></i>Chọn Thành Viên / Số Phòng Để Điền Nhanh:
@@ -149,7 +149,7 @@
       </div>
     </div>
 
-    <!-- ADMIN VIEW -->
+    <!-- ADMIN VIEW: DASHBOARD -->
     <div id="adminSection" class="hidden space-y-6">
       
       <!-- Login Gate -->
@@ -165,7 +165,7 @@
         </button>
       </div>
 
-      <!-- Admin Panel -->
+      <!-- Admin Content Panel -->
       <div id="adminPanel" class="hidden space-y-6">
         
         <!-- Stats Bar -->
@@ -223,7 +223,7 @@
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div class="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
             <h3 class="font-bold text-slate-800 text-sm">Danh Sách Khai Báo Chi Tiết 27 Phòng</h3>
-            <span class="text-xs text-slate-500">Loại phòng chỉ hiển thị trong giao diện Quản trị</span>
+            <span class="text-xs text-slate-500">Chỉ Admin mới nhìn thấy Loại phòng & Số phòng thực tế</span>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
@@ -252,34 +252,35 @@
   </main>
 
   <script>
+    // Dữ liệu chuẩn 27 phòng mới nhất theo file ngày 22/10/2026
     const initialRoomsData = {
       1: { type: "Zen suite king", members: ["Lê Ngọc Lâm", "Văn Quang Đức"] },
       2: { type: "Zen house twin", members: ["Nguyễn Tuấn Nam", "Đào Duy Lực"] },
       3: { type: "Zen house twin", members: ["Hà Huy Tố", "Trần Khánh"] },
       4: { type: "Zen suite king", members: ["Hà Tuyết Anh", "Nguyễn Quỳnh Mai"] },
       5: { type: "Zen suite king", members: ["Nguyễn Thị Tuấn Anh", "Nguyễn Thanh Phương"] },
-      6: { type: "Zen house twin", members: ["Lê Thu Hằng", "Vũ Thu Hiền"] },
-      7: { type: "Zen house twin", members: ["Trịnh Hồng Hạnh", "Đặng Thanh Nhàn"] },
-      8: { type: "Zen house twin", members: ["Phạm Thanh Nga", "Đỗ Hương Giang"] },
-      9: { type: "Zen house twin", members: ["Đặng Phương Nga", "Trần Thục Oanh"] },
-      10: { type: "Zen house twin", members: ["Vũ Việt Hà", "Trần Thanh Phương"] },
-      11: { type: "Zen house twin", members: ["Nguyễn Thu Hà", "Trần Mai Hương"] },
+      6: { type: "Zen suite king", members: ["Lê Thu Hằng", "Vũ Thu Hiền"] },
+      7: { type: "Zen suite king", members: ["Trịnh Hồng Hạnh", "Đặng Thanh Nhàn"] },
+      8: { type: "Zen suite king", members: ["Phạm Thanh Nga", "Đỗ Hương Giang"] },
+      9: { type: "Zen suite king", members: ["Đặng Phương Nga", "Trần Thục Oanh"] },
+      10: { type: "Zen suite king", members: ["Vũ Việt Hà", "Trần Thanh Phương"] },
+      11: { type: "Zen suite king", members: ["Nguyễn Thu Hà", "Trần Mai Hương"] },
       12: { type: "Zen house king", members: ["Nguyễn Ngọc Anh", "Vũ Thị Thu Cúc"] },
-      13: { type: "Zen house twin", members: ["Bùi Ánh Tuyết", "Nguyễn Thu Hiền"] },
-      14: { type: "Zen house twin", members: ["Trần Thị Thương", "Nguyễn Vân Hà"] },
+      13: { type: "Zen house king", members: ["Bùi Ánh Tuyết", "Nguyễn Thu Hiền"] },
+      14: { type: "Zen house king", members: ["Trần Thị Thương", "Nguyễn Vân Hà"] },
       15: { type: "Zen suite king", members: ["Đinh Thu Hà", "Nguyễn Thanh Thế"] },
-      16: { type: "Zen house twin", members: ["Lê Thanh Tùng", "Dương Tuấn Anh"] },
-      17: { type: "Zen house twin", members: ["Trịnh Bá Hưng", "Nguyễn Thanh Hải"] },
-      18: { type: "Zen house twin", members: ["Lý Công Độ", "Nguyễn Bình"] },
-      19: { type: "Zen house twin", members: ["Dư Đức Phương", "Vũ Anh Hải"] },
-      20: { type: "Zen house twin", members: ["Nguyễn Trung Nghĩa", "Trần Hoa Việt"] },
-      21: { type: "Zen house twin", members: ["Nông Văn Dong", "Kim Đức Tuân"] },
-      22: { type: "Zen house twin", members: ["Lê Quốc Sơn", "Nguyễn Đức Cang"] },
-      23: { type: "Zen house twin", members: ["Trần Đình Phong", "Nguyễn Quang Phú"] },
-      24: { type: "Zen house twin", members: ["Nguyễn Thanh Nghị", "Nguyễn Thanh Quang"] },
-      25: { type: "Zen house twin", members: ["Vũ Quốc Huy", "Nguyễn Minh Hoàng"] },
-      26: { type: "Zen house twin", members: ["Lê Mạnh Dũng", "Backup nhỡ đâu"] },
-      27: { type: "Zen house twin", members: ["Nguyễn Thiều Sơn", "Nguyễn Công Thắng"] }
+      16: { type: "Zen suite king", members: ["Lê Thanh Tùng", "Dương Tuấn Anh"] },
+      17: { type: "Zen suite king", members: ["Trịnh Bá Hưng", "Nguyễn Thanh Hải"] },
+      18: { type: "Zen suite king", members: ["Lý Công Độ", "Nguyễn Bình"] },
+      19: { type: "Zen suite king", members: ["Dư Đức Phương", "Vũ Anh Hải"] },
+      20: { type: "Zen suite king", members: ["Nguyễn Trung Nghĩa", "Trần Hoa Việt"] },
+      21: { type: "Zen suite king", members: ["Nông Văn Dong", "Kim Đức Tuân"] },
+      22: { type: "Zen suite king", members: ["Lê Quốc Sơn", "Nguyễn Đức Cang"] },
+      23: { type: "Zen suite king", members: ["Trần Đình Phong", "Nguyễn Quang Phú"] },
+      24: { type: "Zen suite king", members: ["Nguyễn Thanh Nghị", "Nguyễn Thanh Quang"] },
+      25: { type: "Zen suite king", members: ["Vũ Quốc Huy", "Nguyễn Minh Hoàng"] },
+      26: { type: "new", members: ["Đoàn Thu Thủy", "Nguyễn Thị Thu Hương"] },
+      27: { type: "new", members: ["Nguyễn Thiều Sơn", "Lê Mạnh Dũng"] }
     };
 
     let guestRecords = {};
@@ -291,6 +292,8 @@
       const savedRecords = localStorage.getItem('serena_guest_records_v4');
       if (savedRecords) {
         guestRecords = JSON.parse(savedRecords);
+      } else {
+        guestRecords = {};
       }
 
       const savedConfigs = localStorage.getItem('serena_room_configs_v4');
@@ -298,7 +301,10 @@
         roomConfigs = JSON.parse(savedConfigs);
       } else {
         for (let i = 1; i <= 27; i++) {
-          roomConfigs[i] = { type: initialRoomsData[i].type };
+          roomConfigs[i] = {
+            type: initialRoomsData[i].type,
+            actualNumber: ""
+          };
         }
       }
 
@@ -413,7 +419,7 @@
 
     function checkAdminAuth() {
       const pass = document.getElementById('adminPassInput').value;
-      if (pass === 'Haga123' || pass === 'admin') {
+      if (pass === 'admin123' || pass === 'admin') {
         isAdminLoggedIn = true;
         document.getElementById('adminAuthGate').classList.add('hidden');
         document.getElementById('adminPanel').classList.remove('hidden');
