@@ -329,7 +329,6 @@
 
     function initData() {
       populateQuickSelectOptions();
-      // Khôi phục lưu trữ tạm cục bộ để form hoạt động mượt mà ngay cả khi offline
       const saved = localStorage.getItem('serena_guest_records_v4');
       if (saved) {
         guestRecords = JSON.parse(saved);
@@ -381,7 +380,7 @@
       }
     }
 
-async function handleFormSubmit(e)
+    function handleFormSubmit(e) {
       e.preventDefault();
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
@@ -402,7 +401,7 @@ async function handleFormSubmit(e)
       guestRecords[data.fullName] = data;
       localStorage.setItem('serena_guest_records_v4', JSON.stringify(guestRecords));
 
-      // Tạo một form ẩn submit trực tiếp đến Google Script URL (Vượt qua hoàn toàn lỗi CORS)
+      // Gửi dữ liệu qua form ẩn (iframe) để tuyệt đối không bị lỗi CORS
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = GOOGLE_SCRIPT_URL;
@@ -435,8 +434,6 @@ async function handleFormSubmit(e)
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i>Gửi Khai Báo';
       }, 1000);
-    }
-      }
     }
 
     function resetForm() {
