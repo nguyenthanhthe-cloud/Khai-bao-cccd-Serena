@@ -75,7 +75,7 @@
           </span>
         </div>
 
-        <!-- Dropdown chọn nhanh (Ẩn hoàn toàn loại phòng) -->
+        <!-- Dropdown chọn nhanh -->
         <div class="mb-6 bg-emerald-50/50 p-4 rounded-xl border border-emerald-100">
           <label class="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-2">
             <i class="fa-solid fa-magnifying-glass mr-1"></i>Chọn Thành Viên / Số Phòng Để Điền Nhanh:
@@ -141,8 +141,8 @@
             <button type="button" onclick="resetForm()" class="px-5 py-2.5 border border-slate-300 rounded-xl text-slate-600 font-semibold text-sm hover:bg-slate-50 transition">
               Làm Mới
             </button>
-            <button type="submit" class="px-6 py-2.5 bg-emerald-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-600/30 hover:bg-emerald-700 transition">
-              <i class="fa-solid fa-paper-plane mr-2"></i>Gửi Khai Báo
+            <button type="submit" id="submitBtn" class="px-6 py-2.5 bg-emerald-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-600/30 hover:bg-emerald-700 transition flex items-center gap-2">
+              <i class="fa-solid fa-paper-plane"></i>Gửi Khai Báo
             </button>
           </div>
         </form>
@@ -213,6 +213,9 @@
           </div>
 
           <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+            <button onclick="fetchDataFromGoogleSheet()" class="px-4 py-2 bg-slate-100 text-slate-700 font-semibold text-sm rounded-lg hover:bg-slate-200 transition flex items-center gap-1.5">
+              <i class="fa-solid fa-rotate mr-1"></i>Tải Lại Dữ Liệu
+            </button>
             <button onclick="exportToExcel()" class="px-4 py-2 bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow hover:bg-emerald-800 transition flex items-center gap-2">
               <i class="fa-solid fa-file-excel"></i>Xuất Excel Báo Cáo
             </button>
@@ -252,7 +255,10 @@
   </main>
 
   <script>
-    // Dữ liệu chuẩn 27 phòng mới nhất theo file ngày 22/10/2026
+    // URL Web App kết nối Google Sheets
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVsluhZX224Vev9ZJt1AeNz9cfMdjp0aLDEUz9mcFaEe_x-ASVi957SnJkwTILE1H7/exec";
+
+    // Dữ liệu 27 phòng chuẩn
     const initialRoomsData = {
       1: { type: "Zen suite king", members: ["Lê Ngọc Lâm", "Văn Quang Đức"] },
       2: { type: "Zen house twin", members: ["Nguyễn Tuấn Nam", "Đào Duy Lực"] },
@@ -284,31 +290,12 @@
     };
 
     let guestRecords = {};
-    let roomConfigs = {};
     let currentRole = 'guest';
     let isAdminLoggedIn = false;
 
     function initData() {
-      const savedRecords = localStorage.getItem('serena_guest_records_v4');
-      if (savedRecords) {
-        guestRecords = JSON.parse(savedRecords);
-      } else {
-        guestRecords = {};
-      }
-
-      const savedConfigs = localStorage.getItem('serena_room_configs_v4');
-      if (savedConfigs) {
-        roomConfigs = JSON.parse(savedConfigs);
-      } else {
-        for (let i = 1; i <= 27; i++) {
-          roomConfigs[i] = {
-            type: initialRoomsData[i].type,
-            actualNumber: ""
-          };
-        }
-      }
-
       populateQuickSelectOptions();
+      fetchDataFromGoogleSheet();
     }
 
     function populateQuickSelectOptions() {
@@ -316,9 +303,8 @@
       select.innerHTML = '<option value="">-- Chọn Tên Bạn hoặc Số Phòng (1 - 27) --</option>';
 
       for (let r = 1; r <= 27; r++) {
-        const groupLabel = `Phòng ${r}`;
         const optgroup = document.createElement('optgroup');
-        optgroup.label = groupLabel;
+        optgroup.label = `Phòng ${r}`;
 
         initialRoomsData[r].members.forEach(name => {
           const option = document.createElement('option');
@@ -342,7 +328,7 @@
       if (guestRecords[name]) {
         const rec = guestRecords[name];
         document.getElementById('cccd').value = rec.cccd || '';
-        document.getElementById('dob').value = rec.dob || '';
+        document.getElementById('dob').value = rec.dob ? rec.dob.split('T')[0] : '';
         document.getElementById('phone').value = rec.phone || '';
         document.getElementById('gender').value = rec.gender || 'Nam';
         document.getElementById('licensePlate').value = rec.licensePlate || '';
@@ -357,30 +343,56 @@
       }
     }
 
-    function handleFormSubmit(e) {
+    async function handleFormSubmit(e) {
       e.preventDefault();
-      const name = document.getElementById('fullName').value.trim();
-      const roomGroup = parseInt(document.getElementById('roomGroup').value);
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang gửi...';
 
-      if (!name || !roomGroup) {
-        alert("Vui lòng điền đầy đủ Tên và Số phòng!");
-        return;
-      }
-
-      guestRecords[name] = {
-        fullName: name,
-        roomGroup: roomGroup,
+      const data = {
+        fullName: document.getElementById('fullName').value.trim(),
+        roomGroup: parseInt(document.getElementById('roomGroup').value),
         cccd: document.getElementById('cccd').value.trim(),
         dob: document.getElementById('dob').value,
         phone: document.getElementById('phone').value.trim(),
         gender: document.getElementById('gender').value,
         licensePlate: document.getElementById('licensePlate').value.trim(),
-        address: document.getElementById('address').value.trim(),
-        updatedAt: new Date().toISOString()
+        address: document.getElementById('address').value.trim()
       };
 
-      localStorage.setItem('serena_guest_records_v4', JSON.stringify(guestRecords));
-      alert(`Đã lưu thông tin khai báo cho thành viên ${name} thành công!`);
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        guestRecords[data.fullName] = data;
+        alert(`Đã gửi thông tin khai báo thành công cho ${data.fullName}!`);
+        resetForm();
+      } catch (err) {
+        alert("Lỗi khi gửi dữ liệu, vui lòng thử lại!");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i>Gửi Khai Báo';
+      }
+    }
+
+    async function fetchDataFromGoogleSheet() {
+      try {
+        const res = await fetch(GOOGLE_SCRIPT_URL);
+        const data = await res.json();
+        guestRecords = {};
+        data.forEach(item => {
+          if (item.fullName) {
+            guestRecords[item.fullName] = item;
+          }
+        });
+        if (isAdminLoggedIn) renderAdminTable();
+      } catch (err) {
+        console.log("Đang chờ dữ liệu mới từ Google Sheet...");
+      }
     }
 
     function resetForm() {
@@ -409,6 +421,7 @@
         if (isAdminLoggedIn) {
           document.getElementById('adminAuthGate').classList.add('hidden');
           document.getElementById('adminPanel').classList.remove('hidden');
+          fetchDataFromGoogleSheet();
           renderAdminTable();
         } else {
           document.getElementById('adminAuthGate').classList.remove('hidden');
@@ -423,6 +436,7 @@
         isAdminLoggedIn = true;
         document.getElementById('adminAuthGate').classList.add('hidden');
         document.getElementById('adminPanel').classList.remove('hidden');
+        fetchDataFromGoogleSheet();
         renderAdminTable();
       } else {
         alert("Mật khẩu Quản trị chưa chính xác! (Mặc định: admin123)");
@@ -441,7 +455,7 @@
 
       for (let r = 1; r <= 27; r++) {
         const members = initialRoomsData[r].members;
-        const roomType = roomConfigs[r] ? roomConfigs[r].type : initialRoomsData[r].type;
+        const roomType = initialRoomsData[r].type;
 
         members.forEach(mName => {
           const isDone = !!guestRecords[mName];
@@ -494,7 +508,7 @@
 
       for (let r = 1; r <= 27; r++) {
         const members = initialRoomsData[r].members;
-        const roomType = roomConfigs[r] ? roomConfigs[r].type : initialRoomsData[r].type;
+        const roomType = initialRoomsData[r].type;
 
         members.forEach(mName => {
           const rec = guestRecords[mName] || {};
@@ -503,7 +517,7 @@
             "Họ và tên": mName,
             "Số phòng đoàn": r,
             "Hạng / Loại phòng": roomType,
-            "Ngày sinh": rec.dob || "",
+            "Ngày sinh": rec.dob ? rec.dob.split('T')[0] : "",
             "Số CCCD/CMT": rec.cccd || "",
             "Số điện thoại": rec.phone || "",
             "Giới tính": rec.gender || "",
