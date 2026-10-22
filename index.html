@@ -381,7 +381,7 @@
       }
     }
 
-    async function handleFormSubmit(e) {
+async function handleFormSubmit(e)
       e.preventDefault();
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
@@ -389,7 +389,7 @@
 
       const data = {
         fullName: document.getElementById('fullName').value.trim(),
-        roomGroup: parseInt(document.getElementById('roomGroup').value),
+        roomGroup: document.getElementById('roomGroup').value,
         cccd: document.getElementById('cccd').value.trim(),
         dob: document.getElementById('dob').value,
         phone: document.getElementById('phone').value.trim(),
@@ -398,25 +398,44 @@
         address: document.getElementById('address').value.trim()
       };
 
-      // Lưu cục bộ trước để giao diện cập nhật tức thì
+      // Lưu cục bộ để admin thấy ngay
       guestRecords[data.fullName] = data;
       localStorage.setItem('serena_guest_records_v4', JSON.stringify(guestRecords));
 
-      try {
-        await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
+      // Tạo một form ẩn submit trực tiếp đến Google Script URL (Vượt qua hoàn toàn lỗi CORS)
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = GOOGLE_SCRIPT_URL;
+      form.target = 'hidden_iframe';
 
-        alert(`Đã gửi thông tin khai báo thành công cho ${data.fullName}! Dữ liệu đã được ghi nhận.`);
+      for (const key in data) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = data[key];
+        form.appendChild(input);
+      }
+
+      let iframe = document.getElementById('hidden_iframe');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.name = 'hidden_iframe';
+        iframe.id = 'hidden_iframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+
+      setTimeout(() => {
+        alert(`Đã gửi thông tin khai báo thành công cho ${data.fullName}!`);
         resetForm();
-      } catch (err) {
-        alert("Đã lưu thông tin trên thiết bị!");
-      } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i>Gửi Khai Báo';
+      }, 1000);
+    }
       }
     }
 
