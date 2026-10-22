@@ -337,6 +337,7 @@
 
     function populateQuickSelectOptions() {
       const select = document.getElementById('quickSelect');
+      if (!select) return;
       select.innerHTML = '<option value="">-- Chọn Tên Bạn hoặc Số Phòng (1 - 27) --</option>';
 
       for (let r = 1; r <= 27; r++) {
@@ -383,8 +384,10 @@
     function handleFormSubmit(e) {
       e.preventDefault();
       const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang gửi...';
+      if(btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Đang gửi...';
+      }
 
       const data = {
         fullName: document.getElementById('fullName').value.trim(),
@@ -397,11 +400,9 @@
         address: document.getElementById('address').value.trim()
       };
 
-      // Lưu cục bộ để admin thấy ngay
       guestRecords[data.fullName] = data;
       localStorage.setItem('serena_guest_records_v4', JSON.stringify(guestRecords));
 
-      // Gửi dữ liệu qua form ẩn (iframe) để tuyệt đối không bị lỗi CORS
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = GOOGLE_SCRIPT_URL;
@@ -431,8 +432,10 @@
       setTimeout(() => {
         alert(`Đã gửi thông tin khai báo thành công cho ${data.fullName}!`);
         resetForm();
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i>Gửi Khai Báo';
+        if(btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i>Gửi Khai Báo';
+        }
       }, 1000);
     }
 
